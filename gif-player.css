@@ -10,18 +10,19 @@ gif-player canvas {
   object-fit: contain;
 }
 
-gif-player .gradient-bottom {
-  display: none;
+gif-player .gif-player-gradient-bottom {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
+  display: none;
   height: 40%;
+  max-height: 374px;
   background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAF2CAYAAACvRfJEAAAAAXNSR0IArs4c6QAAAU9JREFUSEttyelHGAAch/Hu2tZdW/ex2rq2znXf1zrWSiSRzJiJJJFEkkjGJJFEkkgi/ZF5evn4fV98XjzfhIR4iWSRRItI5hApNJFKi0jjEOk0kUETb2gRbznEO5rIpEVkcYhsmsihiVxaRB6HyKeJAlpEIYd4TxMfaKKIFlHMIUpoopQWUcYhymmigiYqaRFVHKKaJj7SImo4RC1NfKKJz7SIOg5RTxMNtIhGDtFEE19o4istoplDtNBEKy2ijUO000QHTXyjRXRyiC6a6KZF9HCIXproo4l+WsQAhxikiSFaxDCHGKGJUZoYo0WMc4gJmpikRXznEFM0MU0TM7SIWQ7xgybmaBE/OcQ87ZUFWIQlWIYVWIU1+AW/4Q/8hXXYgE3Ygm3YgV3Yg304gEM4gmM4gX/wH07hDM7hAi7hCq7hBm7hDu7hAR7hCZ5fAFN2RiTVj6YSAAAAAElFTkSuQmCC);
 }
 
-gif-player.playing .gradient-bottom,
-gif-player:hover .gradient-bottom {
+gif-player.playing .gif-player-gradient-bottom,
+gif-player:hover .gif-player-gradient-bottom {
   display: block;
 }
 
@@ -48,6 +49,10 @@ gif-player gif-player-control-bar button {
   height: 40px;
   border: none;
   background: transparent;
+}
+
+gif-player gif-player-control-bar button.gif-player-repeat-button {
+  margin-left: auto;
 }
 
 gif-player gif-player-control-bar input[type="range"] {

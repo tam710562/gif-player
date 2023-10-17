@@ -4,11 +4,16 @@ class GifPlayer {
   control = document.createElement('gif-player');
   #controlBar = document.createElement('gif-player-control-bar');
   #playPauseButton = document.createElement('button');
+  #repeatButton = document.createElement('button');
   #currentTimeDuration = document.createElement('div');
   #progressBar = document.createElement('input');
   #icons = {
     play: 'M8,5.14V19.14L19,12.14L8,5.14Z',
     pause: 'M14,19H18V5H14M6,19H10V5H6V19Z',
+    fullscreen: 'M5,5H10V7H7V10H5V5M14,5H19V10H17V7H14V5M17,14H19V19H14V17H17V14M10,17V19H5V14H7V17H10Z',
+    fullscreenExit: 'M14,14H19V16H16V19H14V14M5,14H10V19H8V16H5V14M8,5H10V10H5V8H8V5M19,8V10H14V5H16V8H19Z',
+    repeat: 'M17,17H7V14L3,18L7,22V19H19V13H17M7,7H17V10L21,6L17,2V5H5V11H7V7Z',
+    repeatOff: 'M2,5.27L3.28,4L20,20.72L18.73,22L15.73,19H7V22L3,18L7,14V17H13.73L7,10.27V11H5V8.27L2,5.27M17,13H19V17.18L17,15.18V13M17,5V2L21,6L17,10V7H8.82L6.82,5H17Z',
   };
   duration = 0;
 
@@ -44,6 +49,11 @@ class GifPlayer {
   #loop = false;
   set loop(value) {
     this.#loop = value;
+    if (!this.#loop) {
+      this.#repeatButton.innerHTML = this.#getIcon('repeatOff');
+    } else {
+      this.#repeatButton.innerHTML = this.#getIcon('repeat');
+    }
   }
   get loop() {
     return this.#loop;
@@ -64,15 +74,12 @@ class GifPlayer {
       currentTime += frame.delay;
     }
 
-    console.log(this.frames)
+    // console.log(this.frames)
 
     this.duration = currentTime;
 
     this.width = this.frames[0].canvas.width;
     this.height = this.frames[0].canvas.height;
-
-    this.#canvas.width = this.width;
-    this.#canvas.height = this.height;
 
     this.#renderControl();
 
@@ -80,7 +87,7 @@ class GifPlayer {
   }
 
   #getFramesByArrayBuffer(arrayBuffer) {
-    const gifuct = new window.GIF(arrayBuffer);
+    const gifuct = new GIF(arrayBuffer);
     const gifuctRaw = gifuct.decompressFrames(true);
 
     const maxWidth = Math.max(...gifuctRaw.map(r => r.dims.left + r.dims.width));
@@ -89,19 +96,11 @@ class GifPlayer {
     const tempCanvas = new OffscreenCanvas(0, 0);
     const tempCtx = tempCanvas.getContext('2d');
 
-    function cloneCanvas(oldCanvas) {
-      const newCanvas = new OffscreenCanvas(oldCanvas.width, oldCanvas.height);
-      const ctx = newCanvas.getContext('2d');
-
-      ctx.drawImage(oldCanvas, 0, 0);
-
-      return newCanvas;
-    }
+    tempCanvas.width = maxWidth;
+    tempCanvas.height = maxHeight;
 
     function createCanvas(patch, dims) {
       const imageData = new ImageData(patch, dims.width, dims.height);
-      const width = dims.left + dims.width;
-      const height = dims.top + dims.height;
 
       const tempPathCanvas = new OffscreenCanvas(dims.width, dims.height);
       const tempPathCtx = tempPathCanvas.getContext('2d');
@@ -109,11 +108,13 @@ class GifPlayer {
       tempPathCtx.putImageData(imageData, 0, 0);
       tempCtx.drawImage(tempPathCanvas, dims.left, dims.top);
 
-      return cloneCanvas(tempCanvas);
-    }
+      const newCanvas = new OffscreenCanvas(tempCanvas.width, tempCanvas.height);
+      const ctx = newCanvas.getContext('2d');
 
-    tempCanvas.width = maxWidth;
-    tempCanvas.height = maxHeight;
+      ctx.drawImage(tempCanvas, 0, 0);
+
+      return newCanvas;
+    }
 
     return gifuctRaw.map((raw) => {
       return {
@@ -141,11 +142,13 @@ class GifPlayer {
   }
 
   #renderControl() {
+    this.#canvas.width = this.width;
+    this.#canvas.height = this.height;
     this.#canvas.addEventListener('click', () => this.#playPause());
     this.control.append(this.#canvas);
 
     const gradientBottom = document.createElement('div');
-    gradientBottom.className = 'gradient-bottom';
+    gradientBottom.className = 'gif-player-gradient-bottom';
     gradientBottom.addEventListener('click', () => this.#playPause());
     this.control.append(gradientBottom);
 
@@ -155,18 +158,46 @@ class GifPlayer {
   #renderControlBar() {
     this.control.append(this.#controlBar);
 
+    this.#renderProgressBar();
     if (!this.playing) {
       this.#playPauseButton.innerHTML = this.#getIcon('play');
     } else {
       this.#playPauseButton.innerHTML = this.#getIcon('pause');
     }
+    this.#playPauseButton.className = 'gif-player-play-pause-button';
     this.#playPauseButton.addEventListener('click', () => this.#playPause());
     this.#controlBar.append(this.#playPauseButton);
 
-    this.#renderProgressBar();
-
     this.#currentTimeDuration.innerText = this.#toHHMMSS(this.frames[this.frameIndex].currentTime) + ' / ' + this.#toHHMMSS(this.duration);
     this.#controlBar.append(this.#currentTimeDuration);
+
+    if (!this.loop) {
+      this.#repeatButton.innerHTML = this.#getIcon('repeatOff');
+    } else {
+      this.#repeatButton.innerHTML = this.#getIcon('repeat');
+    }
+    this.#repeatButton.className = 'gif-player-repeat-button';
+    this.#repeatButton.addEventListener('click', () => this.loop = !this.loop);
+    this.#controlBar.append(this.#repeatButton);
+
+    const fullscreenButton = document.createElement('button');
+    fullscreenButton.className = 'gif-player-fullscreen-button';
+    fullscreenButton.innerHTML = this.#getIcon('fullscreen');
+    fullscreenButton.addEventListener('click', () => {
+      if (document.fullscreenElement === this.control) {
+        document.exitFullscreen();
+      } else {
+        this.control.requestFullscreen();
+      }
+    });
+    this.control.addEventListener('fullscreenchange', () => {
+      if (!document.fullscreenElement) {
+        fullscreenButton.innerHTML = this.#getIcon('fullscreen');
+      } else {
+        fullscreenButton.innerHTML = this.#getIcon('fullscreenExit');
+      }
+    });
+    this.#controlBar.append(fullscreenButton);
   }
 
   #renderProgressBar() {
