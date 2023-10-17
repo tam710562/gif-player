@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="./gif-player.css" />
+<script src="https://cdn.jsdelivr.net/gh/matt-way/gifuct-js/dist/gifuct-js.min.js"></script>
+<script src="./gif-player.js"></script>
+
+<input type="file" />
+
+<script>
+  document.querySelector('input[type="file"]').addEventListener('change', async (event) => {
+    const br = document.createElement('br');
+    document.body.appendChild(br);
+
+    const arrayBuffer = await event.target.files[0].arrayBuffer();
+    const gifPlayer = new GifPlayer(arrayBuffer);
+    document.body.appendChild(gifPlayer.control);
+  }, false);
+</script>
