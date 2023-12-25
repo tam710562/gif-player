@@ -62,9 +62,15 @@ class GifPlayer {
   #timeout;
 
   constructor(arrayBuffer) {
-    this.frames = this.#getFramesByArrayBuffer(arrayBuffer);
+    if (arrayBuffer) {
+      this.load(this.#getFramesByArrayBuffer(arrayBuffer));
+    }
+  }
 
-    if (this.length === 0) {
+  load(frames) {
+    this.frames = frames;
+
+    if (this.frames.length === 0) {
       throw new Error('can\'t play image with no frames');
     }
 
@@ -73,8 +79,6 @@ class GifPlayer {
       frame.currentTime = currentTime;
       currentTime += frame.delay;
     }
-
-    // console.log(this.frames)
 
     this.duration = currentTime;
 
