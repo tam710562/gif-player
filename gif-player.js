@@ -63,7 +63,7 @@ class GifPlayer {
 
   constructor(arrayBuffer) {
     if (arrayBuffer) {
-      this.load(this.#getFramesByArrayBuffer(arrayBuffer));
+      this.load(this.getFramesByArrayBuffer(arrayBuffer));
     }
   }
 
@@ -90,7 +90,7 @@ class GifPlayer {
     this.renderFrame();
   }
 
-  #getFramesByArrayBuffer(arrayBuffer) {
+  getFramesByArrayBuffer(arrayBuffer) {
     const gifuct = new GIF(arrayBuffer);
     const gifuctRaw = gifuct.decompressFrames(true);
 
