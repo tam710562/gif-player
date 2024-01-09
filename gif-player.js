@@ -90,10 +90,7 @@ class GifPlayer {
     this.renderFrame();
   }
 
-  getFramesByArrayBuffer(arrayBuffer) {
-    const gifuct = new GIF(arrayBuffer);
-    const gifuctRaw = gifuct.decompressFrames(true);
-
+  getFramesByGifuctRaw(gifuctRaw) {
     const maxWidth = Math.max(...gifuctRaw.map(r => r.dims.left + r.dims.width));
     const maxHeight = Math.max(...gifuctRaw.map(r => r.dims.top + r.dims.height));
 
@@ -127,6 +124,13 @@ class GifPlayer {
         delay: raw.delay,
       };
     });
+  }
+
+  getFramesByArrayBuffer(arrayBuffer) {
+    const gifuct = new GIF(arrayBuffer);
+    const gifuctRaw = gifuct.decompressFrames(true);
+
+    return this.getFramesByGifuctRaw(gifuctRaw);
   }
 
   #getIcon(name) {
