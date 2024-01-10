@@ -67,7 +67,7 @@ class GifPlayer {
     }
   }
 
-  load(frames) {
+  async load(frames) {
     this.frames = frames;
 
     if (this.frames.length === 0) {
@@ -76,6 +76,15 @@ class GifPlayer {
 
     let currentTime = 0;
     for (const frame of this.frames) {
+      if (frame.imageUrl) {
+        const image = new Image();
+        image.src = frame.imageUrl;
+        await image.decode();
+        frame.canvas = new OffscreenCanvas(image.width, image.height);
+        const ctx = frame.canvas.getContext('2d');
+        ctx.drawImage(image, 0, 0);
+      }
+
       frame.currentTime = currentTime;
       currentTime += frame.delay;
     }
@@ -245,14 +254,7 @@ class GifPlayer {
   }
 
   async #drawPatch(frame) {
-    if (frame.imageUrl) {
-      const image = new Image();
-      image.src = frame.imageUrl;
-      await image.decode();
-      this.#ctx.drawImage(image, 0, 0);
-    } else {
-      this.#ctx.drawImage(frame.canvas, 0, 0);
-    }
+    this.#ctx.drawImage(frame.canvas, 0, 0);
   }
 
   renderFrame(index) {
