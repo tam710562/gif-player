@@ -244,8 +244,15 @@ class GifPlayer {
     clearTimeout(this.#timeout);
   }
 
-  #drawPatch(frame) {
-    this.#ctx.drawImage(frame.canvas, 0, 0);
+  async #drawPatch(frame) {
+    if (frame.imageUrl) {
+      const image = new Image();
+      image.src = frame.imageUrl;
+      await image.decode();
+      this.#ctx.drawImage(image, 0, 0);
+    } else {
+      this.#ctx.drawImage(frame.canvas, 0, 0);
+    }
   }
 
   renderFrame(index) {
